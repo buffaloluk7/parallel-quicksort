@@ -19,15 +19,21 @@ func main() {
 	logging.SetBackend(backendLeveled)
 
 	// see: https://github.com/Lacrymology/golang-examples/blob/master/sorting/example/test.go
-	numberOfItems := 1000000
-	items := rand.Perm(numberOfItems)
-	items2 := rand.Perm(numberOfItems)
+	rand.Seed(time.Now().UTC().UnixNano())
+	numberOfItems := 10000
+	items := make([]int, numberOfItems)
+	for i, _ := range items {
+		items[i] = rand.Int() % 200
+	}
 
-	start2 := time.Now()
-	parallel_quicksort.SortQuick(items, true)
-	log.Infof("Took %s to sort %d items.", time.Since(start2), numberOfItems)
-
+	items2 := make([]int, numberOfItems)
+	copy(items2, items)
+	
 	start := time.Now()
 	sorting.Quicksort(sort.IntSlice(items2))
 	log.Infof("Took %s to sort %d items.", time.Since(start), numberOfItems)
+
+	start2 := time.Now()
+	quicksort.Quick(sort.IntSlice(items))
+	log.Infof("Took %s to sort %d items.", time.Since(start2), numberOfItems)
 }

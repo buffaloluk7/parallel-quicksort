@@ -1,107 +1,69 @@
-package parallel_quicksort
+package quicksort
 
 import (
 	"sync"
-	"github.com/op/go-logging"
+	"sort"
 )
 
-var log = logging.MustGetLogger("main")
+func Quick(s sort.Interface) {
+	barrier := &sync.WaitGroup{}
+	barrier.Add(1)
+	go quick(s, 0, s.Len() - 1, barrier)
+	barrier.Wait()
+}
 
-func SortQuick(items []int, runThreaded bool) {
-	if runThreaded {
-		quicksortThreaded(0, len(items) - 1, items)
-	} else {
-		quicksort(0, len(items) - 1, items)
+func quick(data sort.Interface, left, right int, barrier *sync.WaitGroup) {
+	defer barrier.Done()
+
+	if left >= right {
+		return
+	}
+
+	c := quicksortContext{data, left, right, left}
+
+	pivotIndex := c.partition()
+
+	pivotIsFirstElement := pivotIndex == 0
+	if !pivotIsFirstElement {
+		barrier.Add(1)
+		go quick(data, left, pivotIndex - 1, barrier)
+	}
+
+	pivotIsLastElement := pivotIndex + 1 == data.Len()
+	if !pivotIsLastElement {
+		barrier.Add(1)
+		go quick(data, pivotIndex + 1, right, barrier)
 	}
 }
 
-func quicksortThreaded(left, right int, items []int) {
-	if left < right {
-		pivotIndex := partition(left, right, items)
-
-		var wg sync.WaitGroup
-		wg.Add(2)
-
-		go func() {
-			defer func() { wg.Done() }()
-			quicksort(left, pivotIndex - 1, items)
-		}()
-		go func() {
-			defer func() { wg.Done() }()
-			quicksort(pivotIndex + 1, right, items)
-		}()
-
-		wg.Wait()
-	}
+type quicksortContext struct {
+	data sort.Interface
+	left, right, storage int
 }
 
-func quicksort(left, right int, items []int) {
-	if left < right {
-		pivotIndex := partition(left, right, items)
-
-		quicksort(left, pivotIndex - 1, items)
-		quicksort(pivotIndex + 1, right, items)
-	}
+func (c quicksortContext) movePivotToEnd() {
+	c.data.Swap(c.left, c.right)
 }
 
-func partition(left, right int, items []int) int {
-	i := left
-	j := right - 1
-	pivot := items[right]
-	log.Debugf("Left: %d, right: %d, pivot value: %d (index: %d)", i, j, pivot, right)
+func (c quicksortContext) movePivotInPlace() {
+	c.data.Swap(c.storage, c.right)
+}
 
-	for {
-		iChan := nextI(i, right, pivot, items)
-		jChan := nextJ(j, left, pivot, items)
+func (c quicksortContext) pivotPosition() int {
+	return c.storage
+}
 
-		i = <-iChan
-		j = <-jChan
+func (c quicksortContext) partition() int {
+	c.movePivotToEnd()
 
-		if i < j {
-			log.Debugf("Swap values")
-			items[i], items[j] = items[j], items[i]
-		} else {
-			break
+	for i := c.left; i < c.right; i++ {
+		if c.data.Less(i, c.right) {
+			c.data.Swap(i, c.storage)
+			c.storage += 1
 		}
 	}
 
-	if items[i] > pivot {
-		items[i], items[right] = items[right], items[i]
-	}
+	c.movePivotInPlace()
 
-	return i
-}
-
-func nextI(i, right, pivot int, items []int) <-chan int {
-
-	nextIChan := make(chan int)
-
-	go func(c chan <- int) {
-		for ; i < right && items[i] <= pivot; i++ {
-
-		}
-
-		log.Debugf("Next i: %d\n", i)
-
-		c <- i;
-	}(nextIChan)
-
-	return nextIChan
-}
-
-func nextJ(j, left, pivot int, items []int) <-chan int {
-
-	nextJChan := make(chan int)
-
-	go func(c chan <- int) {
-		for ; j > left && items[j] >= pivot; j-- {
-
-		}
-
-		log.Debugf("Next j: %d\n", j)
-
-		c <- j;
-	}(nextJChan)
-
-	return nextJChan
+	return c.pivotPosition()
 }
