@@ -51,7 +51,6 @@ func partition(left, right int, items []int) int {
 	log.Debugf("Left: %d, right: %d, pivot value: %d (index: %d)", i, j, pivot, right)
 
 	for {
-
 		iChan := nextI(i, right, pivot, items)
 		jChan := nextJ(j, left, pivot, items)
 
