@@ -7,11 +7,15 @@ import (
 
 var log = logging.MustGetLogger("main")
 
-func SortQuick(items []int) {
-	quicksort(0, len(items) - 1, items)
+func SortQuick(items []int, runThreaded bool) {
+	if runThreaded {
+		quicksortThreaded(0, len(items) - 1, items)
+	} else {
+		quicksort(0, len(items) - 1, items)
+	}
 }
 
-func quicksort(left, right int, items []int) {
+func quicksortThreaded(left, right int, items []int) {
 	if left < right {
 		pivotIndex := partition(left, right, items)
 
@@ -28,6 +32,15 @@ func quicksort(left, right int, items []int) {
 		}()
 
 		wg.Wait()
+	}
+}
+
+func quicksort(left, right int, items []int) {
+	if left < right {
+		pivotIndex := partition(left, right, items)
+
+		quicksort(left, pivotIndex - 1, items)
+		quicksort(pivotIndex + 1, right, items)
 	}
 }
 

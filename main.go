@@ -20,6 +20,6 @@ func main() {
 	items := rand.Perm(numberOfItems)
 
 	start := time.Now()
- 	parallel_quicksort.SortQuick(items)
+ 	parallel_quicksort.SortQuick(items, false)
 	log.Infof("Took %s to sort %d items.", time.Since(start), numberOfItems)
 }
