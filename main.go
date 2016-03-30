@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/buffaloluk7/parallel-quicksort/quicksort"
+	"github.com/buffaloluk7/parallel-sorting-algorithms/quicksort"
 	"math/rand"
 	"github.com/op/go-logging"
 	"os"
