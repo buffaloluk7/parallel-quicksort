@@ -40,8 +40,8 @@ func Mergesort(list []int, threshold int) []int {
 
 func merge(leftList, rightList []int) []int {
 	size := len(leftList) + len(rightList)
-	i, j := 0, 0
 	slice := make([]int, size)
+	i, j := 0, 0
 
 	for k := 0; k < size; k++ {
 		if i > len(leftList) - 1 && j <= len(rightList) - 1 {

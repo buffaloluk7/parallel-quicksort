@@ -40,7 +40,6 @@ func TestQuicksort(t *testing.T) {
 		input := sort.IntSlice(testCase.input)
 		Quicksort(input, testCase.threshold)
 
-
 		if (!sort.IsSorted(input)) {
 			t.Fail()
 		}
