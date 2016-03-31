@@ -1,18 +1,20 @@
-package quicksort
+package sorting
 
 import (
 	"sync"
 	"sort"
 )
 
-func Quick(s sort.Interface) {
+func Quicksort(s sort.Interface, threshold int) {
 	barrier := &sync.WaitGroup{}
 	barrier.Add(1)
-	go quick(s, 0, s.Len() - 1, barrier)
+
+	go quick(s, 0, s.Len() - 1, barrier, threshold)
+
 	barrier.Wait()
 }
 
-func quick(data sort.Interface, left, right int, barrier *sync.WaitGroup) {
+func quick(data sort.Interface, left, right int, barrier *sync.WaitGroup, threshold int) {
 	defer barrier.Done()
 
 	if left >= right {
@@ -26,18 +28,30 @@ func quick(data sort.Interface, left, right int, barrier *sync.WaitGroup) {
 	pivotIsFirstElement := pivotIndex == 0
 	if !pivotIsFirstElement {
 		barrier.Add(1)
-		go quick(data, left, pivotIndex - 1, barrier)
+
+		sortParallel := threshold == 0 || (pivotIndex - 1) - left > threshold
+		if sortParallel {
+			go quick(data, left, pivotIndex - 1, barrier, threshold)
+		} else {
+			quick(data, left, pivotIndex - 1, barrier, threshold)
+		}
 	}
 
 	pivotIsLastElement := pivotIndex + 1 == data.Len()
 	if !pivotIsLastElement {
 		barrier.Add(1)
-		go quick(data, pivotIndex + 1, right, barrier)
+
+		sortParallel := threshold == 0 || right - (pivotIndex + 1) > threshold
+		if sortParallel {
+			go quick(data, pivotIndex + 1, right, barrier, threshold)
+		} else {
+			quick(data, pivotIndex + 1, right, barrier, threshold)
+		}
 	}
 }
 
 type quicksortContext struct {
-	data sort.Interface
+	data                 sort.Interface
 	left, right, storage int
 }
 
