@@ -21,34 +21,34 @@ func main() {
 
 	// Parse parameters
 	algorithm := flag.String("algorithm", "quicksort", "The algorithm to use. Possible values: quicksort, mergesort")
-	numberOfItems := *flag.Int("numberOfItems", 1000000, "The number of items to sort")
-	allowDuplicates := *flag.Bool("allowDuplicates", true, "Either shuffle a range from 0 to [numberOfItems -1] or create [numberOfItems] random numbers")
-	threshold := *flag.Int("threshold", 0, "The threshold to use. 0 means running all routines in parallel")
-	printHelp := *flag.Bool("help", false, "Print usage")
+	numberOfItems := flag.Int("numberOfItems", 1000000, "The number of items to sort")
+	allowDuplicates := flag.Bool("allowDuplicates", true, "Either shuffle a range from 0 to [numberOfItems -1] or create [numberOfItems] random numbers")
+	threshold := flag.Int("threshold", 0, "The threshold to use. 0 means running all routines in parallel")
+	printHelp := flag.Bool("help", false, "Print usage")
 	flag.Parse()
 
-	if printHelp {
+	if *printHelp {
 		flag.Usage()
 		return
 	}
 
-	if numberOfItems <= 0 {
-		numberOfItems = 1000000
+	if *numberOfItems <= 0 {
+		*numberOfItems = 1000000
 	}
-	if threshold < 0 {
-		threshold = 0
+	if *threshold < 0 {
+		*threshold = 0
 	}
 
 	// Setup items to sort
 	rand.Seed(time.Now().UTC().UnixNano())
 	var items []int
-	if allowDuplicates {
-		items = make([]int, numberOfItems)
+	if *allowDuplicates {
+		items = make([]int, *numberOfItems)
 		for i, _ := range items {
 			items[i] = rand.Int() % 150
 		}
 	} else {
-		items = rand.Perm(numberOfItems)
+		items = rand.Perm(*numberOfItems)
 	}
 
 	// Start measuring the time
@@ -56,10 +56,10 @@ func main() {
 
 	switch *algorithm {
 	case "mergesort":
-		sorting.Mergesort(items, threshold)
+		sorting.Mergesort(items, *threshold)
 	default:
-		sorting.Quicksort(sort.IntSlice(items), threshold)
+		sorting.Quicksort(sort.IntSlice(items), *threshold)
 	}
 
-	log.Infof("Took %s to sort %d items.", time.Since(start), numberOfItems)
+	log.Infof("Took %s to sort %d items.", time.Since(start), *numberOfItems)
 }
