@@ -13,7 +13,7 @@ var quicksortTestData = []struct {
 	threshold int
 }{
 	//Simple Tests
-	{[]int{}, -1},
+	{[]int{}, 0},
 	{[]int{42, 45, 78, 9, 5, 0, 0, 1, 1}, 0},
 	{[]int{42, 23}, 0},
 
